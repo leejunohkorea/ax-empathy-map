@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function admin() {
+      return request.auth != null && exists(/databases/$(database)/documents/axAdmins/$(request.auth.uid)) && get(/databases/$(database)/documents/axAdmins/$(request.auth.uid)).data.enabled == true;
+    }
+    match /axAdmins/{uid} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow list, write: if false;
+    }
+    match /axSessions/{session} {
+      allow get: if request.auth != null;
+      allow list: if admin();
+      allow create, update, delete: if admin();
+      match /responses/{uid} {
+        function valid() {
+          let d = request.resource.data;
+          return d.keys().hasOnly(['schema', 'answers', 'updatedAt']) &&
+            d.schema == 'ax-empathy-v2' && d.updatedAt == request.time &&
+            d.answers is list && d.answers.size() == 30 &&
+            d.answers[0] is bool &&
+            d.answers[1] is bool &&
+            d.answers[2] is bool &&
+            d.answers[3] is bool &&
+            d.answers[4] is bool &&
+            d.answers[5] is bool &&
+            d.answers[6] is bool &&
+            d.answers[7] is bool &&
+            d.answers[8] is bool &&
+            d.answers[9] is bool &&
+            d.answers[10] is bool &&
+            d.answers[11] is bool &&
+            d.answers[12] is bool &&
+            d.answers[13] is bool &&
+            d.answers[14] is bool &&
+            d.answers[15] is bool &&
+            d.answers[16] is bool &&
+            d.answers[17] is bool &&
+            d.answers[18] is bool &&
+            d.answers[19] is bool &&
+            d.answers[20] is bool &&
+            d.answers[21] is bool &&
+            d.answers[22] is bool &&
+            d.answers[23] is bool &&
+            d.answers[24] is bool &&
+            d.answers[25] is bool &&
+            d.answers[26] is bool &&
+            d.answers[27] is bool &&
+            d.answers[28] is bool &&
+            d.answers[29] is bool;
+        }
+        allow read: if admin();
+        allow create, update: if request.auth != null && request.auth.uid == uid &&
+          get(/databases/$(database)/documents/axSessions/$(session)).data.open == true && valid();
+        allow delete: if admin();
+      }
+    }
+  }
+}
